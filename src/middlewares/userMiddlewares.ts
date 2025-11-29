@@ -1,6 +1,11 @@
-import {Request, Response, NextFunction} from 'express'
+import express from "express";
+import jwt from "jsonwebtoken";
 
-export async function validateUserCreation(req:Request, res:Response, next:NextFunction) {
+export async function validateUserCreation(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -16,3 +21,24 @@ export async function validateUserCreation(req:Request, res:Response, next:NextF
   next();
 }
 
+export function authMiddleware(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ message: "No token provided" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET as string);
+    (req as any).user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid or expired token" });
+  }
+}
