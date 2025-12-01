@@ -1,6 +1,10 @@
 import app from "./app.ts";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import { startCronJobsSimple } from './utils/cronJobs.ts';
+
+// Start cron jobs
+startCronJobsSimple();
 
 dotenv.config();
 

@@ -4,6 +4,7 @@ import {
   findUser,
   findUserById,
   insertUserServices,
+  logoutService,
 } from "../services/userServices.ts";
 import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.ts";
 
@@ -14,6 +15,11 @@ export async function createUser(
   try {
     const { email, name, userType, password } = req.body;
 
+    const existingUser = await findUser(email);
+    if (existingUser) {
+      res.status(400).json({ message: "User with this email already exists" });
+      return;
+    }
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
@@ -144,6 +150,60 @@ export async function refreshToken(
     });
   } catch (error) {
     console.error("Refresh token error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export const logoutController = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+    const { refreshToken } = req.body;
+
+    if (!refreshToken) {
+      res.status(400).json({ message: "Refresh token is required" });
+      return;
+    }
+
+    const isLoggedOut = await logoutService(refreshToken);
+
+    if (!isLoggedOut) {
+      res.status(404).json({ message: "Token not found or already invalidated" });
+      return;
+    }
+
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    console.error("Logout controller error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export async function getUserById(
+  req: express.Request,
+  res: express.Response
+): Promise<void> {
+  try {
+
+    const userId = (req as any).user._id;
+    
+    const user = await findUserById(userId);
+    
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+    
+    const { password: _, refreshToken: __, ...userWithoutSensitiveData } = user.toObject();
+    
+    res.status(200).json({
+      success: true,
+      data: userWithoutSensitiveData
+    });
+    
+  } catch (error) {
+    console.error("Get user error:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 }

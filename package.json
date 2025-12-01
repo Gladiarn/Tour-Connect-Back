@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node src/server.ts",
+    "dev": "ts-node -r tsconfig-paths/register --esm src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -12,22 +12,27 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "module",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
+    "cron": "^4.3.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^9.0.0"
+    "mongoose": "^9.0.0",
+    "node-cron": "^4.2.1"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
+    "@types/cron": "^2.0.1",
     "@types/express": "^5.0.5",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.10.1",
     "nodemon": "^3.1.11",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
   }
 }
