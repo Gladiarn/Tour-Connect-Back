@@ -115,17 +115,17 @@ export const getUserFavorites = async (req, res) => {
 export const addToFavorites = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { destinationId } = req.body;
+    const { reference } = req.body;
 
-    if (!destinationId) {
+    if (!reference) {
       res.status(400).json({
         success: false,
-        message: 'Destination ID is required'
+        message: 'reference is required'
       });
       return;
     }
 
-    const favorites = await addToFavoritesService(userId, destinationId);
+    const favorites = await addToFavoritesService(userId, reference);
 
     res.status(200).json({
       success: true,

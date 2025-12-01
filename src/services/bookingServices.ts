@@ -1,5 +1,5 @@
 import userModel from '../models/userModel.ts';
-
+import destinationModel from '../models/destinationModel.ts';
 // Create a booking
 export const createBookingService = async (userId: string, bookingData: any) => {
   try {
@@ -91,14 +91,24 @@ export const getUserFavoritesService = async (userId: string) => {
       throw new Error('User not found');
     }
 
-    return user.favorites;
+    if (!user.favorites || user.favorites.length === 0) {
+      return [];
+    }
+
+    const favoriteDestinations = await destinationModel.find({
+      reference: { $in: user.favorites }
+    }).select('name location images description budget rating activityType reference');
+
+   
+
+    return favoriteDestinations;
   } catch (error) {
     throw new Error(`Failed to fetch favorites: ${error.message}`);
   }
 };
 
 // Add to favorites
-export const addToFavoritesService = async (userId: string, destinationId: string) => {
+export const addToFavoritesService = async (userId: string, reference: string) => {
   try {
     const user = await userModel.findById(userId);
     
@@ -107,11 +117,11 @@ export const addToFavoritesService = async (userId: string, destinationId: strin
     }
 
     // Check if already in favorites
-    if (user.favorites.includes(destinationId)) {
+    if (user.favorites.includes(reference)) {
       throw new Error('Destination already in favorites');
     }
 
-    user.favorites.push(destinationId);
+    user.favorites.push(reference);
     await user.save();
     
     return user.favorites;
