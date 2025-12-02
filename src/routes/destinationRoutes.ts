@@ -4,7 +4,7 @@ import { getAll, getById, getPopular, search } from '../controllers/destinationC
 
 const router = express.Router();
 
-router.get('/popular', getPopular);
+router.post('/popular', getPopular);
 
 router.get('/search', search);
 

@@ -1,19 +1,19 @@
 import destinationModel from "../models/destinationModel.ts";
 
-export const getAllDestinations = async (): Promise<IDestination[]> => {
+export const getAllDestinations = async () => {
   return await destinationModel.find().sort({ createdAt: -1 });
 };
 
 // Get destination by ID
 export const getDestinationById = async (
   id: string
-): Promise<IDestination | null> => {
+) => {
   return await destinationModel.findOne({reference: id });
 };
 
 export const createDestination = async (
-  destinationData: Partial<IDestination>
-): Promise<IDestination> => {
+  destinationData:any
+) => {
   const destination = new destinationModel(destinationData);
   return await destination.save();
 };
@@ -21,8 +21,8 @@ export const createDestination = async (
 // Update destination
 export const updateDestination = async (
   id: string,
-  updateData: Partial<IDestination>
-): Promise<IDestination | null> => {
+  updateData: any
+) => {
   return await destinationModel.findByIdAndUpdate(id, updateData, {
     new: true,
     runValidators: true,
@@ -32,13 +32,30 @@ export const updateDestination = async (
 // Delete destination
 export const deleteDestination = async (
   id: string
-): Promise<IDestination | null> => {
+) => {
   return await destinationModel.findByIdAndDelete(id);
 };
 
 // Popular
-export const getPopularDestinations = async () => {
-  return await destinationModel.find({ rating: { $gte: 4 } });
+export const getPopularDestinations = async (search: string = "") => {
+  try {
+    const query: any = { rating: { $gte: 4 } };
+    
+    // Add search filter if provided
+    if (search.trim()) {
+      const searchRegex = new RegExp(search, 'i');
+      query.$or = [
+        { name: searchRegex },
+        { location: searchRegex },
+        { activityType: searchRegex },
+        { description: searchRegex }
+      ];
+    }
+    
+    return await destinationModel.find(query).sort({ rating: -1 })
+  } catch (error) {
+    throw error;
+  }
 };
 
 export const searchDestinations = async (location: string, activityType: string, minPrice: number, maxPrice: number) => {

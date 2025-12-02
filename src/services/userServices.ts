@@ -31,3 +31,7 @@ export const logoutService = async (refreshToken: string): Promise<boolean> => {
     throw new Error("Database error during logout");
   }
 };
+
+export function getAllUsers() {
+  return userModel.find({}, { password: 0, refreshToken: 0 }).lean();
+}

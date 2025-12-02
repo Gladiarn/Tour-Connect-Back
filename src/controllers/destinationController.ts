@@ -8,7 +8,8 @@ import {
 
 export const getPopular = async (req: express.Request, res: express.Response) => {
   try {
-    const popular = await getPopularDestinations();
+    const { search } = req.body;
+    const popular = await getPopularDestinations(search || "");
     return res.json(popular);
   } catch (error) {
     return res.status(500).json({ message: "Server error" });
