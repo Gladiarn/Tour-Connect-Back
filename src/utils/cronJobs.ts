@@ -4,20 +4,33 @@ import updateBookingStatus from './bookingStatusUpdater.ts';
 export const startCronJobsSimple = () => {
   console.log('🚀 Starting cron jobs...');
 
-  // Update booking status every 10 minutes
+
   cron.schedule('*/10 * * * *', async () => {
-    console.log('🔄 Running booking status update cron job...');
-    await updateBookingStatus();
+    try {
+      console.log('🔄 Running booking status update cron job...');
+      await updateBookingStatus();
+    } catch (err) {
+      console.error('Cron job error:', err);
+    }
   });
 
-  // Run at midnight for thorough cleanup
+
   cron.schedule('0 0 * * *', async () => {
-    console.log('🌙 Running midnight booking status update...');
-    await updateBookingStatus();
+    try {
+      console.log('🌙 Running midnight booking status update...');
+      await updateBookingStatus();
+    } catch (err) {
+      console.error('Cron job error:', err);
+    }
   });
 
   console.log('✅ Cron jobs scheduled');
   
-  // Run immediately on startup
-  updateBookingStatus().catch(console.error);
+  (async () => {
+    try {
+      await updateBookingStatus();
+    } catch (err) {
+      console.error('Initial booking update error:', err);
+    }
+  })();
 };
