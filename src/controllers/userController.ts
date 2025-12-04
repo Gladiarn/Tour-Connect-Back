@@ -5,7 +5,9 @@
     findUserById,
     insertUserServices,
     logoutService,
-    getAllUsers
+    getAllUsers,
+    createHotelBookingService,
+    getUserHotelBookingsService
   } from "../services/userServices.ts";
   import { generateAccessToken, generateRefreshToken, verifyRefreshToken } from "../utils/jwt.ts";
 
@@ -100,6 +102,7 @@
         _id: user._id,
         name: user.name,
         email: user.email,
+        userType: user.userType
       });
     } catch (error) {
       res.status(500).json({ error: "Server error" });
@@ -230,3 +233,74 @@
     });
   }
 }
+
+export const createHotelBookingController = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+    const userId = (req as any).user._id;
+    const bookingData = req.body;
+
+    // Validate required fields
+    const requiredFields = ['name', 'phoneNumber', 'address', 'dateRange', 'nightCount', 'totalPrice', 'roomReference', 'hotelReference'];
+    for (const field of requiredFields) {
+      if (!bookingData[field]) {
+        res.status(400).json({ 
+          success: false, 
+          message: `Missing required field: ${field}` 
+        });
+        return;
+      }
+    }
+
+    // Validate dateRange structure
+    if (!bookingData.dateRange.startDate || !bookingData.dateRange.endDate) {
+      res.status(400).json({ 
+        success: false, 
+        message: "Both startDate and endDate are required in dateRange" 
+      });
+      return;
+    }
+
+    // Create the hotel booking
+    const newBooking = await createHotelBookingService(userId, bookingData);
+    
+    res.status(201).json({
+      success: true,
+      message: "Hotel booking created successfully",
+      data: newBooking
+    });
+    
+  } catch (error) {
+    console.error("Create hotel booking error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: error instanceof Error ? error.message : "Internal server error" 
+    });
+  }
+};
+
+export const getUserHotelBookingsController = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+    const userId = (req as any).user._id;
+    
+    const hotelBookings = await getUserHotelBookingsService(userId);
+    
+    res.status(200).json({
+      success: true,
+      count: hotelBookings.length,
+      data: hotelBookings
+    });
+    
+  } catch (error) {
+    console.error("Get hotel bookings error:", error);
+    res.status(500).json({ 
+      success: false,
+      message: error instanceof Error ? error.message : "Internal server error" 
+    });
+  }
+};

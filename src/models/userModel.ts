@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+// Booking Schema (for destinations)
 const bookingSchema = new mongoose.Schema({
   destinationReference: {
     type: String,
@@ -27,6 +28,74 @@ const bookingSchema = new mongoose.Schema({
   },
 });
 
+// Hotel Booking Schema - Matches your bookRoomTypes state
+const hotelBookingSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  checkInDate: {
+    type: Date,
+    required: true,
+  },
+  checkOutDate: {
+    type: Date,
+    required: true,
+  },
+  nightCount: {
+    type: Number,
+    required: true,
+  },
+  totalPrice: {
+    type: Number,
+    required: true,
+  },
+  roomReference: {
+    type: String,
+    required: true,
+  },
+  hotelReference: {
+    type: String,
+    required: true,
+  },
+  image: {
+    type: String,
+    required: true
+  },
+// optional
+  roomDetails: {
+    name: { type: String },
+    price: { type: Number },
+    features: [{ type: String }],
+    facilities: [{ type: String }],
+    description: { type: String },
+    guests: [{ type: String }],
+    area: { type: String },
+  },
+  hotelDetails: {
+    name: { type: String },
+    location: { type: String },
+    rating: { type: Number },
+  },
+  dateBooked: { 
+    type: Date, 
+    default: Date.now 
+  },
+  status: {
+    type: String,
+    enum: ["upcoming", "ongoing", "completed", "cancelled"],
+    default: "upcoming",
+  },
+});
+
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -39,6 +108,7 @@ const userSchema = new mongoose.Schema({
     },
   ],
   bookings: [bookingSchema],
+  hotelBookings: [hotelBookingSchema],
 });
 
 const userModel = mongoose.model("user", userSchema);

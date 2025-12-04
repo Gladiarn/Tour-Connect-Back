@@ -77,3 +77,66 @@ export const searchDestinations = async (location: string, activityType: string,
 
   return await destinationModel.find(query);
 };
+
+export interface FilterCriteria {
+  province?: string;
+  activityType?: string;
+  priceRange?: string;
+}
+
+export const getFilteredDestinations = async (filters: FilterCriteria) => {
+  try {
+    const query: any = {};
+    
+    const hasFilters = Object.values(filters).some(value => 
+      value !== undefined && value !== null && value !== ''
+    );
+    
+    if (!hasFilters) {
+      return await destinationModel.find().sort({ createdAt: -1 });
+    }
+    
+    if (filters.province && filters.province.trim()) {
+      const provinceRegex = new RegExp(filters.province.trim(), 'i');
+      query.location = { $regex: provinceRegex };
+    }
+    
+    if (filters.activityType && filters.activityType.trim()) {
+      const activityRegex = new RegExp(filters.activityType.trim(), 'i');
+      query.activityType = { $regex: activityRegex };
+    }
+    
+    if (filters.priceRange && filters.priceRange.trim()) {
+      const priceRange = parsePriceRange(filters.priceRange);
+      if (priceRange) {
+        query.budget = {
+          $gte: priceRange.min,
+          $lte: priceRange.max
+        };
+      }
+    }
+    
+    return await destinationModel.find(query).sort({ createdAt: -1 });
+  } catch (error) {
+    throw error;
+  }
+};
+
+const parsePriceRange = (priceRange: string): { min: number; max: number } | null => {
+  try {
+    const cleanRange = priceRange.replace(/,/g, '').replace(/\s+/g, '');
+    const parts = cleanRange.split(/[-–]/);
+    
+    if (parts.length !== 2) return null;
+    
+    const min = parseInt(parts[0].trim());
+    const max = parseInt(parts[1].trim());
+    
+    if (isNaN(min) || isNaN(max)) return null;
+    
+    return { min, max };
+  } catch (error) {
+    console.error('Error parsing price range:', error);
+    return null;
+  }
+};

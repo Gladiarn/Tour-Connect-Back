@@ -35,3 +35,49 @@ export const logoutService = async (refreshToken: string): Promise<boolean> => {
 export function getAllUsers() {
   return userModel.find({}, { password: 0, refreshToken: 0 }).lean();
 }
+
+export const createHotelBookingService = async (userId: string, bookingData: any) => {
+  try {
+    const user = await userModel.findById(userId);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const newHotelBooking = {
+      name: bookingData.name,
+      phoneNumber: bookingData.phoneNumber,
+      address: bookingData.address,
+      checkInDate: new Date(bookingData.dateRange.startDate),
+      checkOutDate: new Date(bookingData.dateRange.endDate),
+      nightCount: bookingData.nightCount,
+      totalPrice: bookingData.totalPrice,
+      roomReference: bookingData.roomReference,
+      hotelReference: bookingData.hotelReference,
+      image: bookingData.image,
+      dateBooked: new Date(),
+      status: 'upcoming' as const
+    };
+
+    user.hotelBookings.push(newHotelBooking);
+    const updatedUser = await user.save();
+    
+    return updatedUser.hotelBookings[updatedUser.hotelBookings.length - 1];
+  } catch (error) {
+    throw new Error(`Failed to create hotel booking: ${error}`);
+  }
+};
+
+export const getUserHotelBookingsService = async (userId: string) => {
+  try {
+    const user = await userModel.findById(userId).select('hotelBookings');
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user.hotelBookings;
+  } catch (error) {
+    throw new Error(`Failed to fetch hotel bookings: ${error}`);
+  }
+};
