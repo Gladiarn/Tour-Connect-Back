@@ -1,4 +1,5 @@
 import express from "express";
+import destinationModel from "../models/destinationModel.ts"; // Import the model
 import {
   FilterCriteria,
   getAllDestinations,
@@ -6,6 +7,7 @@ import {
   getFilteredDestinations,
   getPopularDestinations,
   searchDestinations,
+  createDestination as createDestinationService // Rename to avoid conflict
 } from "../services/destinationServices.ts";
 
 export const getPopular = async (req: express.Request, res: express.Response) => {
@@ -14,6 +16,7 @@ export const getPopular = async (req: express.Request, res: express.Response) =>
     const popular = await getPopularDestinations(search || "");
     return res.json(popular);
   } catch (error) {
+    console.error("Error fetching popular destinations:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -31,6 +34,7 @@ export const search = async (req: express.Request, res: express.Response) => {
 
     return res.json(destinations);
   } catch (error) {
+    console.error("Error searching destinations:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -40,6 +44,7 @@ export const getAll = async (req: express.Request, res: express.Response) => {
     const destinations = await getAllDestinations();
     return res.json(destinations);
   } catch (error) {
+    console.error("Error fetching all destinations:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -53,6 +58,7 @@ export const getById = async (req: express.Request, res: express.Response) => {
     }
     return res.json(destination);
   } catch (error) {
+    console.error("Error fetching destination by ID:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -78,6 +84,83 @@ export const getFiltered = async (req: express.Request, res: express.Response) =
     return res.status(500).json({ 
       success: false, 
       message: "Server error while fetching destinations" 
+    });
+  }
+};
+
+export const createDestination = async (req: express.Request, res: express.Response) => {
+  try {
+    const destinationData = req.body;
+
+    // Validate required fields
+    if (!destinationData.name || !destinationData.reference || !destinationData.location) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Name, reference, and location are required" 
+      });
+    }
+
+    // Validate rating
+    if (destinationData.rating < 0 || destinationData.rating > 5) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Rating must be between 0 and 5" 
+      });
+    }
+
+    // Validate budget
+    if (destinationData.budget < 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Budget cannot be negative" 
+      });
+    }
+
+    // Check if destination with same reference already exists
+    const existingDestination = await destinationModel.findOne({ 
+      reference: destinationData.reference 
+    });
+    
+    if (existingDestination) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "Destination with this reference already exists" 
+      });
+    }
+
+    // Create destination using the service
+    const newDestination = await createDestinationService(destinationData);
+
+    return res.status(201).json({
+      success: true,
+      message: "Destination created successfully",
+      data: newDestination
+    });
+
+  } catch (error: any) {
+    console.error("Error creating destination:", error);
+    
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "Duplicate entry. Destination reference must be unique." 
+      });
+    }
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err: any) => err.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: "Validation failed", 
+        errors: messages 
+      });
+    }
+
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error while creating destination" 
     });
   }
 };

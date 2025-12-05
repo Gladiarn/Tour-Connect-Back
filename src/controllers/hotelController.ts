@@ -1,6 +1,11 @@
-
 import express from "express";
-import { getHotelsByLocation, getAllHotels, getRoomByReferences } from "../services/hotelServices.ts";
+import hotelModel from "../models/hotelModel.ts"; // Import the model
+import { 
+  getHotelsByLocation, 
+  getAllHotels, 
+  getRoomByReferences, 
+  createNewHotel // Import the renamed function
+} from "../services/hotelServices.ts";
 
 export const getByLocation = async (req: express.Request, res: express.Response) => {
   try {
@@ -13,6 +18,7 @@ export const getByLocation = async (req: express.Request, res: express.Response)
     const hotels = await getHotelsByLocation(location as string);
     return res.json(hotels);
   } catch (error) {
+    console.error("Error fetching hotels by location:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -22,6 +28,7 @@ export const getAll = async (req: express.Request, res: express.Response) => {
     const hotels = await getAllHotels();
     return res.json(hotels);
   } catch (error) {
+    console.error("Error fetching all hotels:", error);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -38,6 +45,84 @@ export const getRoom = async (req: express.Request, res: express.Response) => {
 
     return res.json(roomData);
   } catch (error) {
+    console.error("Error fetching room:", error);
     return res.status(500).json({ message: "Server error" });
+  }
+};
+
+export const createHotel = async (req: express.Request, res: express.Response) => {
+  try {
+    const hotelData = req.body;
+
+    // Validate required fields
+    if (!hotelData.name || !hotelData.location || !hotelData.reference) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Hotel name, location, and reference are required" 
+      });
+    }
+
+    // Validate rooms array
+    if (!hotelData.rooms || !Array.isArray(hotelData.rooms) || hotelData.rooms.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "At least one room is required" 
+      });
+    }
+
+    // Validate each room
+    for (let i = 0; i < hotelData.rooms.length; i++) {
+      const room = hotelData.rooms[i];
+      if (!room.roomReference || !room.name || !room.price) {
+        return res.status(400).json({ 
+          success: false, 
+          message: `Room ${i + 1} is missing required fields (roomReference, name, or price)` 
+        });
+      }
+    }
+
+    // Check if hotel with same reference already exists
+    const existingHotel = await hotelModel.findOne({ reference: hotelData.reference });
+    if (existingHotel) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "Hotel with this reference already exists" 
+      });
+    }
+
+    // Create hotel using the renamed service function
+    const newHotel = await createNewHotel(hotelData);
+
+    return res.status(201).json({
+      success: true,
+      message: "Hotel created successfully",
+      data: newHotel
+    });
+
+  } catch (error: any) {
+    console.error("Error creating hotel:", error);
+    
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "Duplicate entry. Hotel reference must be unique." 
+      });
+    }
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err: any) => err.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: "Validation failed", 
+        errors: messages 
+      });
+    }
+
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error while creating hotel" 
+    });
   }
 };

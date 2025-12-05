@@ -1,13 +1,10 @@
-// services/hotelServices.ts
-import hotelModel from "../models/hotelModel.ts";
+import hotelModel, { IHotel } from "../models/hotelModel.ts";
 
 export const getHotelsByLocation = async (destinationLocation: string) => {
   const [city, province] = destinationLocation.split(',').map(part => part.trim());
   
   const searchConditions: any[] = [
-
     { location: { $regex: destinationLocation, $options: 'i' } },
-
     { location: { $regex: city, $options: 'i' } }
   ];
   
@@ -24,12 +21,11 @@ export const getAllHotels = async () => {
   return await hotelModel.find();
 };
 
-export const createHotel = async (hotelData: any) => {
+// Renamed to avoid conflict
+export const createNewHotel = async (hotelData: Partial<IHotel>) => {
   const hotel = new hotelModel(hotelData);
   return await hotel.save();
 };
-
-
 
 export const getRoomByReferences = async (hotelReference: string, roomReference: string) => {
   const hotel = await hotelModel.findOne({ reference: hotelReference });

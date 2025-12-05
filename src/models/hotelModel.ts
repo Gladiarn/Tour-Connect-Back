@@ -63,7 +63,6 @@ const HotelSchema: Schema = new Schema(
     }],
     duration: {
       type: String,
-      required: [true, "Duration is required"],
     },
     rooms: [RoomSchema],
     rating: {

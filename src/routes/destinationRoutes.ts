@@ -1,17 +1,20 @@
 import express from 'express';
-import { getPopularDestinations, searchDestinations } from '../services/destinationServices.ts';
-import { getAll, getById, getFiltered, getPopular, search } from '../controllers/destinationController.ts';
+import { 
+  getPopular, 
+  search, 
+  getAll, 
+  getById, 
+  getFiltered,
+  createDestination // Add this import
+} from '../controllers/destinationController.ts';
 
 const router = express.Router();
 
 router.post('/popular', getPopular);
-
 router.get('/search', search);
-
-router.get('/all', getAll)
-
-router.get('/:id', getById)
-
+router.get('/all', getAll);
+router.get('/:id', getById);
 router.post('/filter', getFiltered);
+router.post('/create', createDestination); // Add this route
 
 export default router;
