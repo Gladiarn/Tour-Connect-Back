@@ -1,3 +1,4 @@
+import express from "express";
 import {
   createBookingService,
   getOngoingBookingsService,
@@ -12,9 +13,9 @@ import {
 } from '../services/bookingServices.ts';
 
 // Create a booking
-export const createBooking = async (req, res) => {
+export const createBooking = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const bookingData = req.body;
 
     const booking = await createBookingService(userId, bookingData);
@@ -24,7 +25,7 @@ export const createBooking = async (req, res) => {
       message: 'Booking created successfully',
       data: booking
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       success: false,
       message: error.message
@@ -33,9 +34,9 @@ export const createBooking = async (req, res) => {
 };
 
 // Get ongoing bookings (upcoming + ongoing)
-export const getOngoingBookings = async (req, res) => {
+export const getOngoingBookings = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const bookings = await getOngoingBookingsService(userId);
 
     res.status(200).json({
@@ -43,7 +44,7 @@ export const getOngoingBookings = async (req, res) => {
       count: bookings.length,
       data: bookings
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: error.message
@@ -52,9 +53,9 @@ export const getOngoingBookings = async (req, res) => {
 };
 
 // Get past bookings (completed + cancelled)
-export const getPastBookings = async (req, res) => {
+export const getPastBookings = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
 
     const bookings = await getPastBookingsService(userId);
 
@@ -63,7 +64,7 @@ export const getPastBookings = async (req, res) => {
       count: bookings.length,
       data: bookings
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: error.message
@@ -72,9 +73,9 @@ export const getPastBookings = async (req, res) => {
 };
 
 // Get all user bookings
-export const getUserBookings = async (req, res) => {
+export const getUserBookings = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
 
     const bookings = await getUserBookingsService(userId);
 
@@ -83,7 +84,7 @@ export const getUserBookings = async (req, res) => {
       count: bookings.length,
       data: bookings
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: error.message
@@ -92,9 +93,9 @@ export const getUserBookings = async (req, res) => {
 };
 
 // Get user favorites
-export const getUserFavorites = async (req, res) => {
+export const getUserFavorites = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
 
     const favorites = await getUserFavoritesService(userId);
 
@@ -103,7 +104,7 @@ export const getUserFavorites = async (req, res) => {
       count: favorites.length,
       data: favorites
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(500).json({
       success: false,
       message: error.message
@@ -112,9 +113,9 @@ export const getUserFavorites = async (req, res) => {
 };
 
 // Add to favorites
-export const addToFavorites = async (req, res) => {
+export const addToFavorites = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const { reference } = req.body;
 
     if (!reference) {
@@ -132,7 +133,7 @@ export const addToFavorites = async (req, res) => {
       message: 'Added to favorites',
       data: favorites
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       success: false,
       message: error.message
@@ -141,9 +142,9 @@ export const addToFavorites = async (req, res) => {
 };
 
 // Remove from favorites
-export const removeFromFavorites = async (req, res) => {
+export const removeFromFavorites = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const { destinationId } = req.params;
 
     const favorites = await removeFromFavoritesService(userId, destinationId);
@@ -153,7 +154,7 @@ export const removeFromFavorites = async (req, res) => {
       message: 'Removed from favorites',
       data: favorites
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       success: false,
       message: error.message
@@ -162,9 +163,9 @@ export const removeFromFavorites = async (req, res) => {
 };
 
 // Get single booking
-export const getBookingById = async (req, res) => {
+export const getBookingById = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const { bookingId } = req.params;
 
     const booking = await getBookingByIdService(userId, bookingId);
@@ -173,7 +174,7 @@ export const getBookingById = async (req, res) => {
       success: true,
       data: booking
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(404).json({
       success: false,
       message: error.message
@@ -182,9 +183,9 @@ export const getBookingById = async (req, res) => {
 };
 
 // Update booking status
-export const updateBookingStatus = async (req, res) => {
+export const updateBookingStatus = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const { bookingId } = req.params;
     const { status } = req.body;
 
@@ -195,7 +196,7 @@ export const updateBookingStatus = async (req, res) => {
       message: 'Booking status updated successfully',
       data: booking
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       success: false,
       message: error.message
@@ -204,9 +205,9 @@ export const updateBookingStatus = async (req, res) => {
 };
 
 // Cancel booking
-export const cancelBooking = async (req, res) => {
+export const cancelBooking = async (req: express.Request, res: express.Response) => {
   try {
-    const userId = req.user._id;
+    const userId = (req as any).user._id;
     const { bookingId } = req.params;
 
     const booking = await cancelBookingService(userId, bookingId);
@@ -216,7 +217,7 @@ export const cancelBooking = async (req, res) => {
       message: 'Booking cancelled successfully',
       data: booking
     });
-  } catch (error) {
+  } catch (error: any) {
     res.status(400).json({
       success: false,
       message: error.message

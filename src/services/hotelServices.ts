@@ -51,3 +51,34 @@ export const getRoomByReferences = async (hotelReference: string, roomReference:
     }
   };
 };
+
+
+
+export const deleteHotelService = async (reference: string) => {
+  try {
+
+    const result = await hotelModel.findOneAndDelete({ reference });
+    
+    if (!result) {
+      return {
+        success: false,
+        message: "Hotel not found",
+        statusCode: 404
+      };
+    }
+
+    return {
+      success: true,
+      message: "Hotel deleted successfully"
+    };
+
+  } catch (error: any) {
+    console.error("Error in deleteHotel service:", error);
+    
+    return {
+      success: false,
+      message: error.message || "Failed to delete hotel",
+      statusCode: 500
+    };
+  }
+};

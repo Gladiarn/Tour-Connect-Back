@@ -36,6 +36,38 @@ export function getAllUsers() {
   return userModel.find({}, { password: 0, refreshToken: 0 }).lean();
 }
 
+export const deleteUserService = async (userId: string) => {
+  try {
+    // Check if user exists
+    const userToDelete = await userModel.findById(userId);
+    
+    if (!userToDelete) {
+      return {
+        success: false,
+        message: "User not found",
+        statusCode: 404
+      };
+    }
+
+    // Delete the user
+    await userModel.findByIdAndDelete(userId);
+
+    return {
+      success: true,
+      message: "User deleted successfully"
+    };
+
+  } catch (error: any) {
+    console.error("Error in deleteUserService:", error);
+    
+    return {
+      success: false,
+      message: error.message || "Failed to delete user",
+      statusCode: 500
+    };
+  }
+};
+
 export const createHotelBookingService = async (userId: string, bookingData: any) => {
   try {
     const user = await userModel.findById(userId);

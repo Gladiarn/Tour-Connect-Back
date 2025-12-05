@@ -1,10 +1,11 @@
 import express from "express";
-import hotelModel from "../models/hotelModel.ts"; // Import the model
+import hotelModel from "../models/hotelModel.ts";
 import { 
   getHotelsByLocation, 
   getAllHotels, 
   getRoomByReferences, 
-  createNewHotel // Import the renamed function
+  createNewHotel,
+  deleteHotelService 
 } from "../services/hotelServices.ts";
 
 export const getByLocation = async (req: express.Request, res: express.Response) => {
@@ -54,7 +55,7 @@ export const createHotel = async (req: express.Request, res: express.Response) =
   try {
     const hotelData = req.body;
 
-    // Validate required fields
+
     if (!hotelData.name || !hotelData.location || !hotelData.reference) {
       return res.status(400).json({ 
         success: false, 
@@ -62,7 +63,7 @@ export const createHotel = async (req: express.Request, res: express.Response) =
       });
     }
 
-    // Validate rooms array
+
     if (!hotelData.rooms || !Array.isArray(hotelData.rooms) || hotelData.rooms.length === 0) {
       return res.status(400).json({ 
         success: false, 
@@ -123,6 +124,41 @@ export const createHotel = async (req: express.Request, res: express.Response) =
     return res.status(500).json({ 
       success: false, 
       message: "Server error while creating hotel" 
+    });
+  }
+};
+
+export const deleteHotel = async (req: express.Request, res: express.Response) => {
+  try {
+    const { reference } = req.params;
+
+    if (!reference) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Hotel reference is required" 
+      });
+    }
+
+    const result = await deleteHotelService(reference);
+
+    if (!result.success) {
+      return res.status(result.statusCode || 400).json({
+        success: false,
+        message: result.message
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Hotel deleted successfully"
+    });
+
+  } catch (error: any) {
+    console.error("Error deleting hotel:", error);
+    
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error while deleting hotel" 
     });
   }
 };

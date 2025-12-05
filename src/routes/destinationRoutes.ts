@@ -5,7 +5,8 @@ import {
   getAll, 
   getById, 
   getFiltered,
-  createDestination // Add this import
+  createDestination,
+  deleteDestination
 } from '../controllers/destinationController.ts';
 
 const router = express.Router();
@@ -15,6 +16,7 @@ router.get('/search', search);
 router.get('/all', getAll);
 router.get('/:id', getById);
 router.post('/filter', getFiltered);
-router.post('/create', createDestination); // Add this route
+router.post('/create', createDestination);
+router.delete('/:id', deleteDestination);
 
 export default router;
