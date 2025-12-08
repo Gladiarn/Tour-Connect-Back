@@ -66,12 +66,7 @@ const PackageSchema: Schema = new Schema({
     max: {
       type: Number,
       required: [true, 'Maximum pack size is required'],
-      validate: {
-        validator: function(this: any, value: number) {
-          return value >= this.packsize.min;
-        },
-        message: 'Maximum pack size must be greater than or equal to minimum'
-      }
+      min: [1, 'Maximum pack size must be at least 1']
     }
   },
   reference: {
@@ -83,6 +78,5 @@ const PackageSchema: Schema = new Schema({
 }, {
   timestamps: true
 });
-
 
 export default mongoose.model<IPackage>('Package', PackageSchema);
