@@ -15,6 +15,8 @@ import {
   getUserHotelBookingsController,
   deleteUserController,
   editUserController,
+    createPackageBookingController,
+  getUserPackageBookingsController,
 } from "../controllers/userController.ts";
 
 const router = express.Router();
@@ -34,4 +36,7 @@ router.put("/edit", authMiddleware, editUserController);
 router.post("/hotel-bookings", authMiddleware, createHotelBookingController);
 router.get("/hotel-bookings", authMiddleware, getUserHotelBookingsController);
 
+// Package Booking routes - Add these
+router.post("/package-bookings", authMiddleware, createPackageBookingController);
+router.get("/package-bookings", authMiddleware, getUserPackageBookingsController);
 export default router;

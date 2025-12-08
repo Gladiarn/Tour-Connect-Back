@@ -70,7 +70,7 @@ const hotelBookingSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-// optional
+  // optional
   roomDetails: {
     name: { type: String },
     price: { type: Number },
@@ -96,6 +96,49 @@ const hotelBookingSchema = new mongoose.Schema({
   },
 });
 
+// Package Booking Schema - Based on what we're sending
+const packageBookingSchema = new mongoose.Schema({
+  packageReference: {
+    type: String,
+    required: true,
+  },
+  image: { 
+    type: String, 
+    required: true 
+  },
+  dateBooked: { 
+    type: Date, 
+    default: Date.now 
+  },
+  dateStart: { 
+    type: Date, 
+    required: true 
+  },
+  totalPrice: { 
+    type: Number, 
+    required: true 
+  },
+  // Package details for reference (optional but useful)
+  packageDetails: {
+    name: { type: String },
+    location: { type: String },
+    duration: { type: String },
+    packsize: {
+      min: { type: Number },
+      max: { type: Number }
+    },
+    price: { type: Number },
+    pricePerHead: { type: Number },
+    inclusions: [{ type: String }],
+    description: { type: String }
+  },
+  status: {
+    type: String,
+    enum: ["upcoming", "ongoing", "completed", "cancelled"],
+    default: "upcoming",
+  },
+});
+
 const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   name: { type: String, required: true },
@@ -107,8 +150,9 @@ const userSchema = new mongoose.Schema({
       type: String,
     },
   ],
-  bookings: [bookingSchema],
+  bookings: [bookingSchema],     
   hotelBookings: [hotelBookingSchema],
+  packageBookings: [packageBookingSchema],
 });
 
 const userModel = mongoose.model("user", userSchema);

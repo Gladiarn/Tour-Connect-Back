@@ -153,3 +153,61 @@ export const editUserService = async (
     throw error;
   }
 };
+
+export const createPackageBookingService = async (userId: string, bookingData: any) => {
+  try {
+    const user = await userModel.findById(userId);
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+
+    const newPackageBooking = {
+      packageReference: bookingData.packageReference,
+      image: bookingData.image,
+      dateBooked: new Date(), 
+      dateStart: new Date(bookingData.dateStart),
+      totalPrice: bookingData.totalPrice,
+      status: 'upcoming' as const,
+
+      ...(bookingData.packageDetails && {
+        packageDetails: {
+          name: bookingData.packageDetails.name,
+          location: bookingData.packageDetails.location,
+          duration: bookingData.packageDetails.duration,
+          packsize: bookingData.packageDetails.packsize,
+          price: bookingData.packageDetails.price,
+          pricePerHead: bookingData.packageDetails.pricePerHead,
+          inclusions: bookingData.packageDetails.inclusions || [],
+          description: bookingData.packageDetails.description,
+        }
+      })
+    };
+
+    user.packageBookings.push(newPackageBooking);
+    const updatedUser = await user.save();
+    
+    return updatedUser.packageBookings[updatedUser.packageBookings.length - 1];
+  } catch (error) {
+    console.error("Create package booking service error:", error);
+    throw new Error(`Failed to create package booking: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};
+
+export const getUserPackageBookingsService = async (userId: string) => {
+  try {
+    const user = await userModel.findById(userId).select('packageBookings');
+    
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    return user.packageBookings.sort((a: any, b: any) => 
+      new Date(b.dateStart).getTime() - new Date(a.dateStart).getTime()
+    );
+  } catch (error) {
+    console.error("Get package bookings service error:", error);
+    throw new Error(`Failed to fetch package bookings: ${error instanceof Error ? error.message : 'Unknown error'}`);
+  }
+};

@@ -10,6 +10,8 @@ import {
   getUserHotelBookingsService,
   deleteUserService,
   editUserService,
+  getUserPackageBookingsService,
+  createPackageBookingService,
 } from "../services/userServices.ts";
 import {
   generateAccessToken,
@@ -443,3 +445,99 @@ export const editUserController = async (
     });
   }
 }
+
+export const createPackageBookingController = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+    const userId = (req as any).user._id;
+    const bookingData = req.body;
+
+    // Validate required fields
+    const requiredFields = [
+      "packageReference",
+      "dateStart",
+      "totalPrice",
+      "image"
+    ];
+    
+    for (const field of requiredFields) {
+      if (!bookingData[field]) {
+        res.status(400).json({
+          success: false,
+          message: `Missing required field: ${field}`,
+        });
+        return;
+      }
+    }
+
+    // Validate dateStart is a valid date
+    const dateStart = new Date(bookingData.dateStart);
+    if (isNaN(dateStart.getTime())) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid dateStart format",
+      });
+      return;
+    }
+
+    // Validate dateStart is not in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (dateStart < today) {
+      res.status(400).json({
+        success: false,
+        message: "Start date must be today or in the future",
+      });
+      return;
+    }
+
+    // Validate totalPrice is positive
+    if (bookingData.totalPrice <= 0) {
+      res.status(400).json({
+        success: false,
+        message: "Total price must be greater than 0",
+      });
+      return;
+    }
+
+    // Create the package booking
+    const newBooking = await createPackageBookingService(userId, bookingData);
+
+    res.status(201).json({
+      success: true,
+      message: "Package booking created successfully",
+      data: newBooking,
+    });
+  } catch (error) {
+    console.error("Create package booking error:", error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+};
+
+export const getUserPackageBookingsController = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+    const userId = (req as any).user._id;
+
+    const packageBookings = await getUserPackageBookingsService(userId);
+
+    res.status(200).json({
+      success: true,
+      count: packageBookings.length,
+      data: packageBookings,
+    });
+  } catch (error) {
+    console.error("Get package bookings error:", error);
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Internal server error",
+    });
+  }
+};

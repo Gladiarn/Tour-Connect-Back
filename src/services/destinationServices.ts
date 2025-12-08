@@ -1,5 +1,17 @@
 import destinationModel, { IDestination } from "../models/destinationModel.ts";
 
+export const updateDestination = async (reference: string, updateData: any) => {
+
+  return await destinationModel.findOneAndUpdate(
+    { reference: reference },
+    updateData,
+    {
+      new: true,
+      runValidators: true,
+    }
+  );
+};
+
 export const getAllDestinations = async () => {
   return await destinationModel.find().sort({ createdAt: -1 });
 };
@@ -14,13 +26,6 @@ export const createDestination = async (
 ) => {
   const destination = new destinationModel(destinationData);
   return await destination.save();
-};
-
-export const updateDestination = async (id: string, updateData: any) => {
-  return await destinationModel.findByIdAndUpdate(id, updateData, {
-    new: true,
-    runValidators: true,
-  });
 };
 
 

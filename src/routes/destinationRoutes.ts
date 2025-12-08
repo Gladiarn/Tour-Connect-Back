@@ -6,6 +6,7 @@ import {
   getById, 
   getFiltered,
   createDestination,
+    updateDestination,
   deleteDestination
 } from '../controllers/destinationController.ts';
 
@@ -18,5 +19,6 @@ router.get('/:id', getById);
 router.post('/filter', getFiltered);
 router.post('/create', createDestination);
 router.delete('/:id', deleteDestination);
+router.put('/:reference', updateDestination);
 
 export default router;
