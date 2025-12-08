@@ -82,3 +82,21 @@ export const deleteHotelService = async (reference: string) => {
     };
   }
 };
+
+export const updateHotelService = async (reference: string, updateData: any) => {
+  try {
+
+    delete updateData.reference;
+    
+    const updatedHotel = await hotelModel.findOneAndUpdate(
+      { reference },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    );
+    
+    return updatedHotel;
+  } catch (error: any) {
+    console.error("Error in updateHotel service:", error);
+    throw error;
+  }
+};

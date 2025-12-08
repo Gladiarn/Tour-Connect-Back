@@ -5,8 +5,93 @@ import {
   getAllHotels, 
   getRoomByReferences, 
   createNewHotel,
-  deleteHotelService 
+  deleteHotelService,
+  updateHotelService
 } from "../services/hotelServices.ts";
+
+export const updateHotel = async (req: express.Request, res: express.Response) => {
+  try {
+    const { reference } = req.params;
+    const hotelData = req.body;
+
+    if (!reference) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Hotel reference is required" 
+      });
+    }
+
+    // Basic validation
+    if (hotelData.name && !hotelData.name.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Hotel name cannot be empty" 
+      });
+    }
+
+    if (hotelData.location && !hotelData.location.trim()) {
+      return res.status(400).json({ 
+        success: false, 
+        message: "Location cannot be empty" 
+      });
+    }
+
+    // Validate rooms if being updated
+    if (hotelData.rooms && Array.isArray(hotelData.rooms)) {
+      for (let i = 0; i < hotelData.rooms.length; i++) {
+        const room = hotelData.rooms[i];
+        if (!room.roomReference || !room.name || !room.price) {
+          return res.status(400).json({ 
+            success: false, 
+            message: `Room ${i + 1} is missing required fields (roomReference, name, or price)` 
+          });
+        }
+      }
+    }
+
+    // Update hotel
+    const updatedHotel = await updateHotelService(reference, hotelData);
+
+    if (!updatedHotel) {
+      return res.status(404).json({ 
+        success: false, 
+        message: "Hotel not found" 
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Hotel updated successfully",
+      data: updatedHotel
+    });
+
+  } catch (error: any) {
+    console.error("Error updating hotel:", error);
+    
+    // Handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(409).json({ 
+        success: false, 
+        message: "Duplicate entry. Hotel reference must be unique." 
+      });
+    }
+
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err: any) => err.message);
+      return res.status(400).json({ 
+        success: false, 
+        message: "Validation failed", 
+        errors: messages 
+      });
+    }
+
+    return res.status(500).json({ 
+      success: false, 
+      message: "Server error while updating hotel" 
+    });
+  }
+};
 
 export const getByLocation = async (req: express.Request, res: express.Response) => {
   try {
