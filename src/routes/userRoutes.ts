@@ -13,7 +13,8 @@ import {
   getAllUsersController,
   createHotelBookingController,
   getUserHotelBookingsController,
-  deleteUserController, // Add this import
+  deleteUserController,
+  editUserController,
 } from "../controllers/userController.ts";
 
 const router = express.Router();
@@ -27,6 +28,7 @@ router.post("/logout", logoutController);
 router.get("/details", authMiddleware, getUserById);
 router.get("/all", getAllUsersController);
 router.delete("/:id", authMiddleware, deleteUserController); // Add this route
+router.put("/edit", authMiddleware, editUserController);
 
 // Hotel Booking routes
 router.post("/hotel-bookings", authMiddleware, createHotelBookingController);

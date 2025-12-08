@@ -9,6 +9,7 @@ import {
   createHotelBookingService,
   getUserHotelBookingsService,
   deleteUserService,
+  editUserService,
 } from "../services/userServices.ts";
 import {
   generateAccessToken,
@@ -369,3 +370,76 @@ export const getUserHotelBookingsController = async (
     });
   }
 };
+
+export const editUserController = async (
+  req: express.Request,
+  res: express.Response
+): Promise<void> => {
+  try {
+
+    const { id, name, email, userType, password } = req.body;
+
+
+    if (!id || !name || !email || !userType) {
+      res.status(400).json({
+        success: false,
+        message: "Missing required fields: id, name, email, and userType are required"
+      });
+      return;
+    }
+
+
+    const validUserTypes = ['user', 'admin', 'premium_traveler'];
+    if (!validUserTypes.includes(userType)) {
+      res.status(400).json({
+        success: false,
+        message: "Invalid userType. Must be one of: user, admin, premium_traveler"
+      });
+      return;
+    }
+
+
+    const updateData: any = {
+      name,
+      email,
+      userType
+    };
+
+
+    if (password && password.trim() !== "") {
+      updateData.password = await bcrypt.hash(password, 12);
+    }
+
+    const updatedUser = await editUserService(id, updateData);
+
+    res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: updatedUser
+    });
+
+  } catch (error: any) {
+    console.error("Error in editUserController:", error);
+
+    if (error.message === "User not found") {
+      res.status(404).json({
+        success: false,
+        message: error.message
+      });
+      return;
+    }
+    
+    if (error.message === "Email already in use") {
+      res.status(409).json({
+        success: false,
+        message: error.message
+      });
+      return;
+    }
+
+    res.status(500).json({
+      success: false,
+      message: error.message || "An error occurred while updating user"
+    });
+  }
+}

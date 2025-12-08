@@ -113,3 +113,43 @@ export const getUserHotelBookingsService = async (userId: string) => {
     throw new Error(`Failed to fetch hotel bookings: ${error}`);
   }
 };
+
+export const editUserService = async (
+  id: string,
+  updateData: {
+    name: string;
+    email: string;
+    userType: string;
+    password?: string;
+  }
+) => {
+  try {
+
+    const user = await userModel.findById(id);
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    if (updateData.email !== user.email) {
+      const existingUser = await userModel.findOne({ email: updateData.email });
+      if (existingUser) {
+        throw new Error("Email already in use");
+      }
+    }
+
+    const updatedUser = await userModel.findByIdAndUpdate(
+      id,
+      updateData,
+      { new: true }
+    ).select("-password -refreshToken");
+
+    if (!updatedUser) {
+      throw new Error("Failed to update user");
+    }
+
+    return updatedUser;
+  } catch (error: any) {
+    console.error("Error in editUserService:", error);
+    throw error;
+  }
+};
