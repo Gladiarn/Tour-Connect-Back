@@ -5,6 +5,7 @@ import {
   getPackageByReference,
   updatePackage,
   deletePackage,
+  getFilteredPackages
 } from "../controllers/packageController.ts";
 
 const router = express.Router();
@@ -12,8 +13,11 @@ const router = express.Router();
 // Create a new package
 router.post("/create", createPackage);
 
-// Get all packages
+// Get all packages will delete
 router.get("/all", getAllPackages);
+
+// get all + filter
+router.post("/filter", getFilteredPackages);
 
 // Get package by reference
 router.get("/:reference", getPackageByReference);

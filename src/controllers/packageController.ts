@@ -3,7 +3,8 @@ import {
   getAllPackagesService,
   getPackageByReferenceService,
   updatePackageService,
-  deletePackageService
+  deletePackageService,
+  getFilteredPackagesService, // Add this
 } from '../services/packageServices.ts';
 
 // Create package
@@ -46,6 +47,32 @@ export const getAllPackages = async (req: any, res: any) => {
     res.status(500).json({
       success: false,
       message: `Failed to fetch packages: ${error.message}`
+    });
+  }
+};
+
+// Get filtered packages (NEW)
+export const getFilteredPackages = async (req: any, res: any) => {
+  try {
+    const { tourType, packSize, priceRange } = req.body;
+    
+    const filters = {
+      tourType: tourType?.trim(),
+      packSize: packSize?.trim(),
+      priceRange: priceRange?.trim()
+    };
+    
+    const packages = await getFilteredPackagesService(filters);
+    
+    res.status(200).json({
+      success: true,
+      count: packages.length,
+      data: packages
+    });
+  } catch (error: any) {
+    res.status(500).json({
+      success: false,
+      message: `Failed to fetch filtered packages: ${error.message}`
     });
   }
 };
