@@ -1,12 +1,11 @@
 import app from "./app.ts";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { startCronJobsSimple } from './utils/cronJobs.ts';
-
-// Start cron jobs
-startCronJobsSimple();
+import { startCronJobsSimple } from "./utils/cronJobs.ts";
 
 dotenv.config();
+// Start cron jobs
+startCronJobsSimple();
 
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI;
@@ -18,7 +17,11 @@ if (!MONGO_URI) {
 
 const startServer = async (): Promise<void> => {
   try {
-    await mongoose.connect(MONGO_URI);
+    await mongoose.connect(MONGO_URI, {
+      serverSelectionTimeoutMS: 30000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+    });
     console.log("Connected to MONGODB");
 
     app.listen(PORT, () => {
@@ -36,6 +39,5 @@ process.on("SIGINT", async () => {
   console.log("🛑 MongoDB connection closed");
   process.exit(0);
 });
-
 
 startServer();

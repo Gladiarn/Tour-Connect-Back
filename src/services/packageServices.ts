@@ -101,12 +101,26 @@ const parsePackSize = (packSizeStr: string): { min: number; max: number } | null
   }
 };
 
-// Parse price range string
 const parsePriceRange = (priceRange: string): { min: number; max: number } | null => {
   try {
-    const cleanRange = priceRange.replace(/,/g, "").replace(/\s+/g, "");
-    const parts = cleanRange.split(/[-–]/);
 
+    const cleanRange = priceRange.replace(/,/g, "").replace(/\s+/g, "").trim();
+    
+
+    if (cleanRange.includes('+')) {
+      const minStr = cleanRange.replace('+', '');
+      const min = parseInt(minStr);
+      
+      if (isNaN(min)) return null;
+      
+      return { 
+        min, 
+        max: Number.MAX_SAFE_INTEGER 
+      };
+    }
+    
+    const parts = cleanRange.split(/[-–]/);
+    
     if (parts.length !== 2) return null;
 
     const min = parseInt(parts[0].trim());
