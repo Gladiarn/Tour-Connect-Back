@@ -13,12 +13,6 @@ export const createPackageService = async (packageData: any) => {
   return savedPackage;
 };
 
-// Get all packages
-export const getAllPackagesService = async () => {
-  const packages = await packageModel.find().sort({ createdAt: -1 });
-  return packages;
-};
-
 // Get filtered packages (NEW)
 export const getFilteredPackagesService = async (filters: FilterCriteria) => {
   try {

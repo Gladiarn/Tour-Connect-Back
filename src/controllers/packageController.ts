@@ -1,6 +1,5 @@
 import {
   createPackageService,
-  getAllPackagesService,
   getPackageByReferenceService,
   updatePackageService,
   deletePackageService,
@@ -30,23 +29,6 @@ export const createPackage = async (req: any, res: any) => {
     res.status(400).json({
       success: false,
       message: `Failed to create package: ${error.message}`
-    });
-  }
-};
-
-// Get all packages
-export const getAllPackages = async (req: any, res: any) => {
-  try {
-    const packages = await getAllPackagesService();
-    
-    res.status(200).json({
-      success: true,
-      data: packages
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: `Failed to fetch packages: ${error.message}`
     });
   }
 };

@@ -1,7 +1,6 @@
 import express from "express";
 import {
   createPackage,
-  getAllPackages,
   getPackageByReference,
   updatePackage,
   deletePackage,
@@ -12,9 +11,6 @@ const router = express.Router();
 
 // Create a new package
 router.post("/create", createPackage);
-
-// Get all packages will delete
-router.get("/all", getAllPackages);
 
 // get all + filter
 router.post("/filter", getFilteredPackages);
