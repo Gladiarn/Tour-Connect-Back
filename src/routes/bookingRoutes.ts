@@ -15,7 +15,6 @@ import {authMiddleware } from '../middlewares/userMiddlewares.ts';
 
 const router = express.Router();
 
-// All routes require authentication
 router.use(authMiddleware);
 
 // Booking routes
