@@ -1,226 +1,220 @@
-import express from "express";
-import {
-  createBookingService,
-  getOngoingBookingsService,
-  getPastBookingsService,
-  getUserBookingsService,
-  getUserFavoritesService,
-  addToFavoritesService,
-  removeFromFavoritesService,
-  getBookingByIdService,
-  updateBookingStatusService,
-  cancelBookingService
-} from '../services/bookingServices.ts';
+import { Request, Response } from 'express';
+import { BookingService } from '../services/bookingServices.ts';
 
-// Create a booking
-export const createBooking = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const bookingData = req.body;
+export class BookingController {
+  private bookingService: BookingService;
 
-    const booking = await createBookingService(userId, bookingData);
-
-    res.status(201).json({
-      success: true,
-      message: 'Booking created successfully',
-      data: booking
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
+  constructor(bookingService?: BookingService) {
+    this.bookingService = bookingService || new BookingService();
   }
-};
 
-// Get ongoing bookings (upcoming + ongoing)
-export const getOngoingBookings = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const bookings = await getOngoingBookingsService(userId);
+  // Create a booking
+  createBooking = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const bookingData = req.body;
 
-    res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: bookings
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+      const booking = await this.bookingService.createBooking(userId, bookingData);
 
-// Get past bookings (completed + cancelled)
-export const getPastBookings = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-
-    const bookings = await getPastBookingsService(userId);
-
-    res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: bookings
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
-// Get all user bookings
-export const getUserBookings = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-
-    const bookings = await getUserBookingsService(userId);
-
-    res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: bookings
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
-// Get user favorites
-export const getUserFavorites = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-
-    const favorites = await getUserFavoritesService(userId);
-
-    res.status(200).json({
-      success: true,
-      count: favorites.length,
-      data: favorites
-    });
-  } catch (error: any) {
-    res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
-
-// Add to favorites
-export const addToFavorites = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const { reference } = req.body;
-
-    if (!reference) {
+      res.status(201).json({
+        success: true,
+        message: 'Booking created successfully',
+        data: booking
+      });
+    } catch (error: any) {
       res.status(400).json({
         success: false,
-        message: 'reference is required'
+        message: error.message
       });
-      return;
     }
+  };
 
-    const favorites = await addToFavoritesService(userId, reference);
+  // Get ongoing bookings
+  getOngoingBookings = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const bookings = await this.bookingService.getOngoingBookings(userId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Added to favorites',
-      data: favorites
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+      res.status(200).json({
+        success: true,
+        count: bookings.length,
+        data: bookings
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 
-// Remove from favorites
-export const removeFromFavorites = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const { destinationId } = req.params;
+  // Get past bookings
+  getPastBookings = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const bookings = await this.bookingService.getPastBookings(userId);
 
-    const favorites = await removeFromFavoritesService(userId, destinationId);
+      res.status(200).json({
+        success: true,
+        count: bookings.length,
+        data: bookings
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 
-    res.status(200).json({
-      success: true,
-      message: 'Removed from favorites',
-      data: favorites
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+  // Get all user bookings
+  getUserBookings = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const bookings = await this.bookingService.getUserBookings(userId);
 
-// Get single booking
-export const getBookingById = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const { bookingId } = req.params;
+      res.status(200).json({
+        success: true,
+        count: bookings.length,
+        data: bookings
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 
-    const booking = await getBookingByIdService(userId, bookingId);
+  // Get user favorites
+  getUserFavorites = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const favorites = await this.bookingService.getUserFavorites(userId);
 
-    res.status(200).json({
-      success: true,
-      data: booking
-    });
-  } catch (error: any) {
-    res.status(404).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+      res.status(200).json({
+        success: true,
+        count: favorites.length,
+        data: favorites
+      });
+    } catch (error: any) {
+      res.status(500).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 
-// Update booking status
-export const updateBookingStatus = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const { bookingId } = req.params;
-    const { status } = req.body;
+  // Add to favorites
+  addToFavorites = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const { reference } = req.body;
 
-    const booking = await updateBookingStatusService(userId, bookingId, status);
+      if (!reference) {
+        res.status(400).json({
+          success: false,
+          message: 'reference is required'
+        });
+        return;
+      }
 
-    res.status(200).json({
-      success: true,
-      message: 'Booking status updated successfully',
-      data: booking
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+      const favorites = await this.bookingService.addToFavorites(userId, reference);
 
-// Cancel booking
-export const cancelBooking = async (req: express.Request, res: express.Response) => {
-  try {
-    const userId = (req as any).user._id;
-    const { bookingId } = req.params;
+      res.status(200).json({
+        success: true,
+        message: 'Added to favorites',
+        data: favorites
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
 
-    const booking = await cancelBookingService(userId, bookingId);
+  // Remove from favorites
+  removeFromFavorites = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const { destinationId } = req.params;
 
-    res.status(200).json({
-      success: true,
-      message: 'Booking cancelled successfully',
-      data: booking
-    });
-  } catch (error: any) {
-    res.status(400).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+      const favorites = await this.bookingService.removeFromFavorites(userId, destinationId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Removed from favorites',
+        data: favorites
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
+
+  // Get single booking
+  getBookingById = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const { bookingId } = req.params;
+
+      const booking = await this.bookingService.getBookingById(userId, bookingId);
+
+      res.status(200).json({
+        success: true,
+        data: booking
+      });
+    } catch (error: any) {
+      res.status(404).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
+
+  // Update booking status
+  updateBookingStatus = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const { bookingId } = req.params;
+      const { status } = req.body;
+
+      const booking = await this.bookingService.updateBookingStatus(userId, bookingId, status);
+
+      res.status(200).json({
+        success: true,
+        message: 'Booking status updated successfully',
+        data: booking
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
+
+  // Cancel booking
+  cancelBooking = async (req: Request, res: Response): Promise<void> => {
+    try {
+      const userId = (req as any).user._id;
+      const { bookingId } = req.params;
+
+      const booking = await this.bookingService.cancelBooking(userId, bookingId);
+
+      res.status(200).json({
+        success: true,
+        message: 'Booking cancelled successfully',
+        data: booking
+      });
+    } catch (error: any) {
+      res.status(400).json({
+        success: false,
+        message: error.message
+      });
+    }
+  };
+}
