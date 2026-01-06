@@ -1,24 +1,16 @@
-import express from 'express';
-import { 
-  getPopular, 
-  search, 
-  getAll, 
-  getById, 
-  getFiltered,
-  createDestination,
-    updateDestination,
-  deleteDestination
-} from '../controllers/destinationController.ts';
+import express from "express";
+import { DestinationController } from "../controllers/destinationController.ts";
 
+const destinationController = new DestinationController();
 const router = express.Router();
 
-router.post('/popular', getPopular);
-router.get('/search', search);
-router.get('/all', getAll);
-router.get('/:id', getById);
-router.post('/filter', getFiltered);
-router.post('/create', createDestination);
-router.delete('/:id', deleteDestination);
-router.put('/:reference', updateDestination);
+router.post("/popular", destinationController.getPopular);
+router.get("/search", destinationController.search);
+router.get("/all", destinationController.getAll);
+router.get("/:id", destinationController.getById);
+router.post("/filter", destinationController.getFiltered);
+router.post("/create", destinationController.createDestination);
+router.delete("/:id", destinationController.deleteDestination);
+router.put("/:reference", destinationController.updateDestination);
 
 export default router;
