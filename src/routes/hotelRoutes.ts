@@ -1,21 +1,17 @@
-
 import express from 'express';
-import { 
-  getByLocation, 
-  getAll, 
-  getRoom, 
-  createHotel, 
-  deleteHotel,
-  updateHotel
-} from '../controllers/hotelController.ts';
+import { HotelController } from '../controllers/hotelController.ts';
 
 const router = express.Router();
 
-router.get('/all', getAll);
-router.get('/location', getByLocation);
-router.get('/:hotelReference/:roomReference', getRoom);
-router.post('/create', createHotel);
-router.put('/:reference', updateHotel);
-router.delete('/:reference', deleteHotel);
+// 🟡 Create instance of the controller
+const hotelController = new HotelController();
+
+// Routes using instance methods
+router.get('/all', hotelController.getAll);
+router.get('/location', hotelController.getByLocation);
+router.get('/:hotelReference/rooms/:roomReference', hotelController.getRoom);
+router.post('/create', hotelController.createHotel);
+router.put('/:reference', hotelController.updateHotel);
+router.delete('/:reference', hotelController.deleteHotel);
 
 export default router;
