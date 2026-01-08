@@ -116,7 +116,6 @@ export class PackageService {
     return !!result;
   }
 
-  // Private helper method: Parse packSize string
   private parsePackSize(packSizeStr: string): { min: number; max: number } | null {
     try {
       const cleanStr = packSizeStr.trim();
