@@ -1,9 +1,11 @@
-import app from "./app.ts";
-import mongoose from "mongoose";
 import dotenv from "dotenv";
+dotenv.config();
+import app from "./app.ts";
+
+import mongoose from "mongoose";
+
 import { startCronJobsSimple } from "./utils/cronJobs.ts";
 
-dotenv.config();
 // Start cron jobs
 startCronJobsSimple();
 
