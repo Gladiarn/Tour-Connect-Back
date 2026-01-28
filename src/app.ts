@@ -5,6 +5,7 @@ import destinationRoutes from './routes/destinationRoutes.ts'
 import hotelRoutes from './routes/hotelRoutes.ts'
 import packageRoutes from './routes/packageRoutes.ts'
 import bookingRoutes from './routes/bookingRoutes.ts'
+import aiRoutes from './routes/aiRoutes.ts'
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -30,5 +31,8 @@ app.use('/api/packages', packageRoutes);
 
 //booking
 app.use('/api/bookings', bookingRoutes);
+
+// ai
+app.use('/api/ai', aiRoutes)
 
 export default app;
